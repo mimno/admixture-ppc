@@ -1,0 +1,43 @@
+#!/bin/bash
+
+CLASSPATH=class
+
+MEMORY=5500m
+
+VERBOSE=
+#VERBOSE=-verbose:gc
+
+JAVA_COMMAND="java $VERBOSE -Xmx$MEMORY -ea -Djava.awt.headless=true -server -cp $CLASSPATH -Dfile.encoding=UTF-8 -Djava.util.logging.config.file=logging.properties" 
+
+CMD=$1
+shift
+
+help()
+{
+cat <<EOF
+Usage: ppc [command] [plink .bed file] [genome pop file] [snp pop file] ...
+
+Admixture PPC commands: 
+
+  sim      Similarity between population-specific subsets of genomes
+  fst      Association between admixture populations and genome labels
+  entropy  Uncertainty in posterior distribution over allele populations
+  lag-mi   Mutual information between nearby alleles
+  gwas     Ability to control for false positives in phenotype associations
+
+Include --help with any option for more information
+EOF
+}
+
+CLASS=
+
+case $CMD in
+    sim) CLASS=org.mimno.admixture.SimilarityPPC;;
+    fst) CLASS=org.mimno.admixture.FixationIndexPPC;;
+    entropy) CLASS=org.mimno.admixture.EntropyPPC;;
+    lag-mi) CLASS=org.mimno.admixture.LaggedMutualInformationPPC;;
+    gwas) CLASS=org.mimno.admixture.PhenotypeAssociationPPC;;
+    *) echo "Unrecognized command: $CMD"; help; exit 1;;
+esac
+
+$JAVA_COMMAND $CLASS $*
